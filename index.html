@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JobHunt — Find Your Dream Career</title>
+  <meta name="description" content="Discover thousands of opportunities from top companies. Your next big move starts here."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/home.css"/>
+  <link rel="stylesheet" href="css/jobs.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+
+  <style>
+    /* ── Auth Overlay ── */
+    #auth-overlay {
+      position: fixed; inset: 0; z-index: 8000;
+      display: none;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: authFadeIn 0.3s ease;
+    }
+    @keyframes authFadeIn { from{opacity:0;transform:scale(0.98)} to{opacity:1;transform:scale(1)} }
+    #auth-overlay .auth-page {
+      max-width: 960px; width: 100%;
+      max-height: 90vh;
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+      border: 1px solid var(--border-2);
+    }
+    #auth-overlay .auth-right { overflow-y: auto; max-height: 90vh; }
+
+    /* Nav avatar pill */
+    #nav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      display: none; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 0.8rem;
+      color: var(--black); font-weight: 700;
+      border: 2px solid rgba(232,184,75,0.4);
+      cursor: pointer; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Progress Bar ─── -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ─── Toast Container ─── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ═══════════════════════════════════════════════
+     AUTH OVERLAY (Login / Register)
+     ═══════════════════════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-page">
+
+    <!-- Left branding panel -->
+    <div class="auth-left">
+      <div class="auth-left-grid"></div>
+      <div class="auth-left-glow"></div>
+      <div class="auth-left-content">
+        <div class="auth-brand" onclick="Auth.hideAuth(); Router.navigate('home')">
+          <div class="auth-brand-icon">🎯</div>
+          Job<em>Hunt</em>
+        </div>
+        <div class="auth-tagline">
+          Your next big<br/>move starts<br/><em>right here.</em>
+        </div>
+        <p class="auth-sub">
+          Join thousands of professionals discovering their dream careers every day.
+        </p>
+        <div class="auth-features">
+          <div class="auth-feature"><div class="auth-feature-dot"></div>2,400+ live job listings</div>
+          <div class="auth-feature"><div class="auth-feature-dot"></div>Top companies hiring now</div>
+          <div class="auth-feature"><div class="auth-feature-dot"></div>One-click apply & track</div>
+          <div class="auth-feature"><div class="auth-feature-dot"></div>Free for job seekers</div>
+        </div>
+      </div>
+      <div class="auth-testimonial">
+        <div class="auth-testimonial-text">
+          "Landed my dream job at Stripe within 3 weeks. The experience was seamless — exactly what job hunting should be."
+        </div>
+        <div class="auth-testimonial-author">
+          <div class="auth-testimonial-avatar">AS</div>
+          <div>
+            <div class="auth-testimonial-name">Aarav Singh</div>
+            <div class="auth-testimonial-role">Senior Engineer at Stripe</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-right">
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="Auth.switchTab('login')">Sign In</button>
+        <button class="auth-tab" data-tab="register" onclick="Auth.switchTab('register')">Create Account</button>
+      </div>
+
+      <div id="auth-form-title" class="auth-form-title">Welcome back</div>
+      <p id="auth-form-sub" class="auth-form-sub">Sign in to your JobHunt account to continue</p>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="auth-panel active" id="auth-login">
+        <!-- Social -->
+        <div class="auth-socials">
+          <button class="auth-social-btn" onclick="Auth.handleLogin({preventDefault:()=>{}}); Toast.show('Use email/phone sign in', 'info')">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+          </button>
+          <button class="auth-social-btn" onclick="Toast.show('Social login coming soon', 'info')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-3.55 2.35-5.43 4.56-5.43 1.168 0 2.42.77 3.236.77.739 0 2.08-.83 3.638-.83.476 0 2.415.04 3.655 1.64zm-6.33-8.73c-.022.09-.043.19-.043.29 0 1.44 1.027 2.52 2.17 2.52.03 0 .062-.01.091-.01.035-.18.05-.35.05-.53 0-1.32-.949-2.5-2.268-2.27z"/></svg>
+            Apple
+          </button>
+        </div>
+
+        <div class="auth-divider">or continue with</div>
+
+        <!-- Input method toggle -->
+        <div class="auth-input-method">
+          <button class="auth-method-btn active" data-method="email" onclick="Auth.setInputMethod('email')"><i class="fas fa-envelope"></i> Email</button>
+          <button class="auth-method-btn" data-method="phone" onclick="Auth.setInputMethod('phone')"><i class="fas fa-phone"></i> Phone</button>
+        </div>
+
+        <form onsubmit="Auth.handleLogin(event)">
+          <!-- Email field -->
+          <div class="auth-input-group" id="login-email-group">
+            <i class="auth-input-icon fas fa-envelope"></i>
+            <input class="form-input" type="email" id="login-email" placeholder="you@example.com"/>
+          </div>
+          <div class="field-error" id="login-id-error"></div>
+
+          <!-- Phone field -->
+          <div class="auth-input-group" id="login-phone-group" style="display:none">
+            <i class="auth-input-icon fas fa-phone"></i>
+            <input class="form-input" type="tel" id="login-phone" placeholder="+91 98765 43210"/>
+          </div>
+
+          <!-- Password -->
+          <div class="auth-input-group">
+            <i class="auth-input-icon fas fa-lock"></i>
+            <input class="form-input" type="password" id="login-password" placeholder="Password"/>
+            <button type="button" class="auth-input-toggle" onclick="Auth.togglePasswordVis('login-password', this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="field-error" id="login-pass-error"></div>
+
+          <div class="auth-forgot"><a href="#">Forgot password?</a></div>
+
+          <button type="submit" class="auth-submit-btn">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+        </form>
+
+        <p class="auth-terms">
+          Don't have an account? <a href="#" onclick="Auth.switchTab('register')">Create one for free →</a>
+        </p>
+      </div>
+
+      <!-- ── REGISTER PANEL ── -->
+      <div class="auth-panel" id="auth-register">
+        <!-- Social -->
+        <div class="auth-socials">
+          <button class="auth-social-btn" onclick="Toast.show('Social sign-up coming soon', 'info')">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+          </button>
+          <button class="auth-social-btn" onclick="Toast.show('Social sign-up coming soon', 'info')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-3.55 2.35-5.43 4.56-5.43 1.168 0 2.42.77 3.236.77.739 0 2.08-.83 3.638-.83.476 0 2.415.04 3.655 1.64zm-6.33-8.73c-.022.09-.043.19-.043.29 0 1.44 1.027 2.52 2.17 2.52.03 0 .062-.01.091-.01.035-.18.05-.35.05-.53 0-1.32-.949-2.5-2.268-2.27z"/></svg>
+            Apple
+          </button>
+        </div>
+
+        <div class="auth-divider">or register with</div>
+
+        <!-- Input method toggle -->
+        <div class="auth-input-method">
+          <button class="auth-method-btn active" data-method="email" onclick="Auth.setInputMethod('email')"><i class="fas fa-envelope"></i> Email</button>
+          <button class="auth-method-btn" data-method="phone" onclick="Auth.setInputMethod('phone')"><i class="fas fa-phone"></i> Phone</button>
+        </div>
+
+        <form onsubmit="Auth.handleRegister(event)">
+          <div class="auth-name-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+            <div class="auth-input-group" style="margin-bottom:0">
+              <i class="auth-input-icon fas fa-user"></i>
+              <input class="form-input" type="text" id="reg-first" placeholder="First name"/>
+            </div>
+            <div class="auth-input-group" style="margin-bottom:0">
+              <input class="form-input" type="text" id="reg-last" placeholder="Last name" style="padding-left:16px"/>
+            </div>
+          </div>
+          <div class="field-error" id="reg-name-error"></div>
+
+          <!-- Email field -->
+          <div class="auth-input-group" id="reg-email-group">
+            <i class="auth-input-icon fas fa-envelope"></i>
+            <input class="form-input" type="email" id="reg-email" placeholder="you@example.com"/>
+          </div>
+
+          <!-- Phone field -->
+          <div class="auth-input-group" id="reg-phone-group" style="display:none">
+            <i class="auth-input-icon fas fa-phone"></i>
+            <input class="form-input" type="tel" id="reg-phone" placeholder="+91 98765 43210"/>
+          </div>
+          <div class="field-error" id="reg-id-error"></div>
+
+          <div class="auth-input-group">
+            <i class="auth-input-icon fas fa-lock"></i>
+            <input class="form-input" type="password" id="reg-password" placeholder="Create password (min 6 chars)"/>
+            <button type="button" class="auth-input-toggle" onclick="Auth.togglePasswordVis('reg-password', this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="field-error" id="reg-pass-error"></div>
+
+          <div class="auth-input-group">
+            <i class="auth-input-icon fas fa-lock"></i>
+            <input class="form-input" type="password" id="reg-confirm" placeholder="Confirm password"/>
+          </div>
+          <div class="field-error" id="reg-confirm-error"></div>
+
+          <button type="submit" class="auth-submit-btn">
+            <i class="fas fa-user-plus"></i> Create My Account
+          </button>
+        </form>
+
+        <p class="auth-terms">
+          By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+        <p class="auth-terms" style="margin-top:8px">
+          Already have an account? <a href="#" onclick="Auth.switchTab('login')">Sign in →</a>
+        </p>
+      </div>
+    </div><!-- /auth-right -->
+  </div><!-- /auth-page -->
+</div><!-- /auth-overlay -->
+
+
+<!-- ─── Mobile Menu ─── -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+  <div class="mobile-link" onclick="Router.navigate('home')">
+    <span class="mobile-link-icon">🏠</span> Home
+  </div>
+  <div class="mobile-link" onclick="Router.navigate('jobs')">
+    <span class="mobile-link-icon">💼</span> Browse Jobs
+  </div>
+  <div class="mobile-link" onclick="Router.navigate('postJob')">
+    <span class="mobile-link-icon">✍️</span> Post a Job
+  </div>
+  <div class="mobile-link" onclick="Router.navigate('saved')">
+    <span class="mobile-link-icon">❤️</span> Saved Jobs
+  </div>
+  <div class="mobile-link" onclick="Router.navigate('profile')">
+    <span class="mobile-link-icon">👤</span> My Profile
+  </div>
+  <div class="mobile-link" onclick="Auth.showAuth(); closeMobileMenu()">
+    <span class="mobile-link-icon">🔑</span> Sign In / Register
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SHARED NAVBAR
+     ═══════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="logo" onclick="Router.navigate('home')">
+    <div class="logo-icon">🎯</div>
+    Job<em>Hunt</em>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#" onclick="Router.navigate('home')" data-nav-page="home" class="active">
+      <span class="nav-dot"></span> Home
+    </a></li>
+    <li><a href="#" onclick="Router.navigate('jobs')" data-nav-page="jobs">
+      <span class="nav-dot"></span> Browse Jobs
+    </a></li>
+    <li><a href="#" onclick="Router.navigate('saved')" data-nav-page="saved">
+      <span class="nav-dot"></span> Saved
+    </a></li>
+    <li><a href="#" onclick="Router.navigate('profile')" data-nav-page="profile">
+      <span class="nav-dot"></span> Profile
+    </a></li>
+  </ul>
+
+  <div class="nav-right">
+    <!-- User avatar (shown when logged in) -->
+    <div id="nav-avatar" onclick="Router.navigate('profile')" title="My Profile"></div>
+
+    <!-- Sign In / Sign Out button -->
+    <button class="btn btn-ghost" id="nav-auth-btn" onclick="Auth.showAuth()" style="font-size:0.82rem;padding:9px 18px">
+      <i class="fas fa-user"></i> Sign In
+    </button>
+
+    <button class="btn btn-gold" onclick="Router.navigate('postJob')" style="font-size:0.82rem;padding:9px 18px">
+      <i class="fas fa-plus"></i> Post a Job
+    </button>
+    <button class="theme-btn" id="themeBtn" onclick="ThemeManager.toggle()">
+      <i class="fas fa-sun"></i>
+    </button>
+    <button class="hamburger" onclick="openMobileMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: HOME
+     ═══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+
+    <!-- Floating cards (decorative) -->
+    <div class="hero-cards-float">
+      <div class="float-card">
+        <div class="float-card-icon">🎨</div>
+        <div>
+          <div class="float-card-title">UI Engineer</div>
+          <div class="float-card-sub">Figma · Remote</div>
+          <span class="float-card-badge">$130K+</span>
+        </div>
+      </div>
+      <div class="float-card" style="margin-left:30px; opacity:0.7">
+        <div class="float-card-icon">⚙️</div>
+        <div>
+          <div class="float-card-title">Backend Lead</div>
+          <div class="float-card-sub">Stripe · Hybrid</div>
+          <span class="float-card-badge">$140K+</span>
+        </div>
+      </div>
+      <div class="float-card" style="opacity:0.5">
+        <div class="float-card-icon">🚀</div>
+        <div>
+          <div class="float-card-title">DevOps Engineer</div>
+          <div class="float-card-sub">Cloudflare · Remote</div>
+          <span class="float-card-badge">$120K+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        2,400+ Jobs Available Now
+      </div>
+
+      <h1 class="hero-title">
+        <span>Find Your</span>
+        <em>Dream Career</em>
+        <span>Today</span>
+      </h1>
+
+      <p class="hero-sub">
+        Discover thousands of opportunities from top companies worldwide.
+        Your next big move starts right here.
+      </p>
+
+      <div class="hero-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="heroSearch" placeholder="Job title, company, or skill…"
+               onkeydown="if(event.key==='Enter') heroSearch()"/>
+        <button class="btn-search" onclick="heroSearch()">Search Jobs</button>
+      </div>
+
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">12<span>K+</span></div>
+          <div class="hero-stat-label">Companies</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">2<span>.4K</span></div>
+          <div class="hero-stat-label">Open Roles</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">98<span>%</span></div>
+          <div class="hero-stat-label">Success Rate</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marquee strip -->
+  <div class="strip">
+    <div class="strip-track" id="stripTrack">
+      <span class="strip-item">Google <span class="strip-dot"></span></span>
+      <span class="strip-item">Microsoft <span class="strip-dot"></span></span>
+      <span class="strip-item">Meta <span class="strip-dot"></span></span>
+      <span class="strip-item">Amazon <span class="strip-dot"></span></span>
+      <span class="strip-item">Netflix <span class="strip-dot"></span></span>
+      <span class="strip-item">Stripe <span class="strip-dot"></span></span>
+      <span class="strip-item">Figma <span class="strip-dot"></span></span>
+      <span class="strip-item">Vercel <span class="strip-dot"></span></span>
+      <span class="strip-item">Linear <span class="strip-dot"></span></span>
+      <span class="strip-item">Notion <span class="strip-dot"></span></span>
+      <span class="strip-item">Google <span class="strip-dot"></span></span>
+      <span class="strip-item">Microsoft <span class="strip-dot"></span></span>
+      <span class="strip-item">Meta <span class="strip-dot"></span></span>
+      <span class="strip-item">Amazon <span class="strip-dot"></span></span>
+      <span class="strip-item">Netflix <span class="strip-dot"></span></span>
+      <span class="strip-item">Stripe <span class="strip-dot"></span></span>
+      <span class="strip-item">Figma <span class="strip-dot"></span></span>
+      <span class="strip-item">Vercel <span class="strip-dot"></span></span>
+      <span class="strip-item">Linear <span class="strip-dot"></span></span>
+      <span class="strip-item">Notion <span class="strip-dot"></span></span>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="categories">
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <span class="section-eyebrow">Explore</span>
+        <div class="section-title">Browse by Category</div>
+        <div class="section-sub">Find the role that fits your expertise</div>
+      </div>
+      <a href="#" onclick="Router.navigate('jobs')" style="color:var(--text-2);font-size:0.875rem;display:flex;align-items:center;gap:6px">
+        View all <i class="fas fa-arrow-right" style="font-size:0.75rem"></i>
+      </a>
+    </div>
+
+    <div class="cat-grid">
+      <div class="cat-card" onclick="filterByCategory('Frontend')">
+        <span class="cat-emoji">🎨</span>
+        <div class="cat-name">Frontend Dev</div>
+        <div class="cat-count">124 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+      <div class="cat-card" onclick="filterByCategory('Backend')">
+        <span class="cat-emoji">⚙️</span>
+        <div class="cat-name">Backend Dev</div>
+        <div class="cat-count">98 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+      <div class="cat-card" onclick="filterByCategory('Full Stack')">
+        <span class="cat-emoji">🔥</span>
+        <div class="cat-name">Full Stack</div>
+        <div class="cat-count">207 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+      <div class="cat-card" onclick="filterByCategory('Devops')">
+        <span class="cat-emoji">🚀</span>
+        <div class="cat-name">DevOps / Cloud</div>
+        <div class="cat-count">76 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+      <div class="cat-card" onclick="filterByCategory('Digital Marketing')">
+        <span class="cat-emoji">📣</span>
+        <div class="cat-name">Digital Marketing</div>
+        <div class="cat-count">55 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+      <div class="cat-card" onclick="Router.navigate('jobs')">
+        <span class="cat-emoji">🤖</span>
+        <div class="cat-name">AI / ML</div>
+        <div class="cat-count">189 open roles</div>
+        <div class="cat-arrow"><i class="fas fa-arrow-up-right"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner">
+    <div class="cta-banner-inner">
+      <span class="cta-tag">For Employers</span>
+      <div class="cta-title">Hire the<br/><em style="font-style:italic;color:var(--gold)">Best Talent</em></div>
+      <p class="cta-sub">Post your jobs in minutes and reach thousands of qualified candidates. Built for teams of every size, from startups to enterprises.</p>
+      <button class="btn btn-gold" style="padding:14px 36px;font-size:0.95rem;font-weight:700" onclick="Router.navigate('postJob')">
+        <i class="fas fa-paper-plane"></i> Post a Job — It's Free
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo" onclick="Router.navigate('home')" style="margin-bottom:1rem">
+          <div class="logo-icon">🎯</div> Job<em>Hunt</em>
+        </div>
+        <p class="footer-desc">The smartest way to find your next career opportunity. Trusted by thousands of job seekers and top companies worldwide.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">For Job Seekers</div>
+        <ul class="footer-links">
+          <li><a onclick="Router.navigate('jobs')">Browse Jobs</a></li>
+          <li><a onclick="Router.navigate('saved')">Saved Jobs</a></li>
+          <li><a onclick="Router.navigate('profile')">My Profile</a></li>
+          <li><a onclick="Router.navigate('apply')">Apply Now</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">For Employers</div>
+        <ul class="footer-links">
+          <li><a onclick="Router.navigate('postJob')">Post a Job</a></li>
+          <li><a>Pricing</a></li>
+          <li><a>Employer Dashboard</a></li>
+          <li><a>Hire Teams</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a>About Us</a></li>
+          <li><a>Blog</a></li>
+          <li><a>Privacy Policy</a></li>
+          <li><a>Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 <em>JobHunt</em>. All rights reserved.</span>
+      <span>Built with ❤️ for dreamers everywhere.</span>
+    </div>
+  </footer>
+</div><!-- /page-home -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: BROWSE JOBS
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="page-jobs">
+
+  <div class="page-hero">
+    <div class="container page-hero-inner">
+      <span class="page-hero-eyebrow">Explore Opportunities</span>
+      <h1>Browse All Jobs</h1>
+      <p>Curated listings from top companies worldwide</p>
+      <div class="jobs-search-row">
+        <input type="text" class="form-input" id="jobSearch" placeholder="🔍  Search jobs, companies, skills…" oninput="Pages.filterJobs()"/>
+        <select class="form-select" id="catFilter" onchange="Pages.filterJobs()" style="max-width:180px">
+          <option value="">All Categories</option>
+          <option value="Frontend">Frontend</option>
+          <option value="Backend">Backend</option>
+          <option value="Full Stack">Full Stack</option>
+          <option value="Devops">DevOps</option>
+          <option value="Digital Marketing">Digital Marketing</option>
+        </select>
+        <select class="form-select" id="locFilter" onchange="Pages.filterJobs()" style="max-width:160px">
+          <option value="">All Locations</option>
+          <option value="Remote">Remote</option>
+          <option value="New York">New York</option>
+          <option value="San Francisco">San Francisco</option>
+          <option value="London">London</option>
+        </select>
+        <button class="btn btn-gold" onclick="Pages.filterJobs()" style="white-space:nowrap">
+          <i class="fas fa-search"></i> Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="jobs-layout">
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title"><i class="fas fa-layer-group"></i> Category</div>
+        <div class="filter-chip active" onclick="Pages.setCategoryFilter('')" data-cat="">
+          All Jobs <span class="chip-count" id="count-all">0</span>
+        </div>
+        <div class="filter-chip" onclick="Pages.setCategoryFilter('Frontend')" data-cat="Frontend">
+          🎨 Frontend <span class="chip-count" id="count-frontend">0</span>
+        </div>
+        <div class="filter-chip" onclick="Pages.setCategoryFilter('Backend')" data-cat="Backend">
+          ⚙️ Backend <span class="chip-count" id="count-backend">0</span>
+        </div>
+        <div class="filter-chip" onclick="Pages.setCategoryFilter('Full Stack')" data-cat="Full Stack">
+          🔥 Full Stack <span class="chip-count" id="count-fullstack">0</span>
+        </div>
+        <div class="filter-chip" onclick="Pages.setCategoryFilter('Devops')" data-cat="Devops">
+          🚀 DevOps <span class="chip-count" id="count-devops">0</span>
+        </div>
+        <div class="filter-chip" onclick="Pages.setCategoryFilter('Digital Marketing')" data-cat="Digital Marketing">
+          📣 Digital Marketing <span class="chip-count" id="count-dm">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="sidebar-title"><i class="fas fa-briefcase"></i> Experience</div>
+        <div class="filter-chip" onclick="Pages.setExpFilter('0-1')">0–1 Year</div>
+        <div class="filter-chip" onclick="Pages.setExpFilter('2-3')">2–3 Years</div>
+        <div class="filter-chip" onclick="Pages.setExpFilter('4-5')">4–5 Years</div>
+        <div class="filter-chip" onclick="Pages.setExpFilter('5+')">5+ Years</div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="sidebar-title"><i class="fas fa-map-pin"></i> Work Type</div>
+        <div class="filter-chip" onclick="Pages.setWorktype('')">All Types</div>
+        <div class="filter-chip" onclick="Pages.setWorktype('Remote')">🌍 Remote</div>
+        <div class="filter-chip" onclick="Pages.setWorktype('Hybrid')">🏢 Hybrid</div>
+        <div class="filter-chip" onclick="Pages.setWorktype('Onsite')">📍 Onsite</div>
+      </div>
+    </aside>
+
+    <div class="jobs-main">
+      <div class="jobs-topbar">
+        <div class="jobs-count"><strong id="resultCount">0</strong> jobs found</div>
+        <select class="sort-select" id="sortSelect" onchange="Pages.filterJobs()">
+          <option value="newest">Newest First</option>
+          <option value="salary">Highest Salary</option>
+          <option value="company">Company A–Z</option>
+        </select>
+      </div>
+      <div class="jobs-list" id="jobsList"></div>
+    </div>
+  </div>
+
+  <footer class="footer" style="margin-top:4rem">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 <em style="color:var(--gold)">JobHunt</em>. All rights reserved.</span>
+    </div>
+  </footer>
+</div><!-- /page-jobs -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: POST JOB
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="page-postJob">
+
+  <div class="form-hero">
+    <div class="container form-hero-inner">
+      <span class="page-hero-eyebrow">Employers</span>
+      <h1>Post a Job Opening</h1>
+      <p>Reach thousands of qualified candidates instantly — completely free.</p>
+    </div>
+  </div>
+
+  <div class="form-page-body">
+    <form onsubmit="submitPostJob(event)">
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-building"></i> Company Information</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Company Name *</label>
+              <input class="form-input" type="text" id="pj-company" placeholder="e.g. Acme Corp" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Job Location *</label>
+              <input class="form-input" type="text" id="pj-location" placeholder="e.g. Remote, New York" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company Logo</label>
+            <div class="file-upload" onclick="document.getElementById('logoFile').click()">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span id="logoFileName">Click to upload company logo (PNG, JPG)</span>
+              <input type="file" id="logoFile" accept="image/*" onchange="handleLogoUpload(this)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-file-alt"></i> Job Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Job Title *</label>
+              <input class="form-input" type="text" id="pj-role" placeholder="e.g. Senior Frontend Engineer" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-select" id="pj-position" required>
+                <option value="" disabled selected>Select category</option>
+                <option>Frontend</option>
+                <option>Backend</option>
+                <option>Full Stack</option>
+                <option>Devops</option>
+                <option>Digital Marketing</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Job Description</label>
+            <textarea class="form-textarea" id="pj-desc" placeholder="Describe the role, responsibilities, and what makes it exciting…" style="min-height:140px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-sliders-h"></i> Requirements & Compensation</div>
+          <div class="form-group">
+            <label class="form-label">Experience Required</label>
+            <div class="radio-group">
+              <label class="radio-option" onclick="selectExpRadio(this,'0-1')">
+                <input type="radio" name="exp" value="0-1"/>
+                <span class="radio-radio"></span> 0–1 Year
+              </label>
+              <label class="radio-option" onclick="selectExpRadio(this,'2-3')">
+                <input type="radio" name="exp" value="2-3"/>
+                <span class="radio-radio"></span> 2–3 Years
+              </label>
+              <label class="radio-option" onclick="selectExpRadio(this,'4-5')">
+                <input type="radio" name="exp" value="4-5"/>
+                <span class="radio-radio"></span> 4–5 Years
+              </label>
+              <label class="radio-option" onclick="selectExpRadio(this,'5+')">
+                <input type="radio" name="exp" value="5+"/>
+                <span class="radio-radio"></span> 5+ Years
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Salary Range</label>
+              <select class="form-select" id="pj-salary">
+                <option value="" disabled selected>Select range</option>
+                <option>$0–$30K</option>
+                <option>$30K–$60K</option>
+                <option>$60K–$100K</option>
+                <option>$100K–$150K</option>
+                <option>$150K+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work Type</label>
+              <select class="form-select" id="pj-worktype">
+                <option>Remote</option>
+                <option>Hybrid</option>
+                <option>Onsite</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-full" style="margin-top:0.5rem">
+          <i class="fas fa-paper-plane"></i> Publish Job Opening
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="footer" style="margin-top:3rem">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 <em style="color:var(--gold)">JobHunt</em>.</span>
+    </div>
+  </footer>
+</div><!-- /page-postJob -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: APPLY
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="page-apply">
+
+  <div class="form-hero">
+    <div class="container form-hero-inner">
+      <span class="page-hero-eyebrow">Application</span>
+      <h1>Apply for Position</h1>
+      <p id="applyJobTitle">Complete your application below</p>
+    </div>
+  </div>
+
+  <div class="form-page-body">
+    <div class="apply-steps">
+      <div class="step active" id="step1">
+        <div class="step-num">1</div>
+        <span class="step-name">Personal Info</span>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-num">2</div>
+        <span class="step-name">Resume</span>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-num">3</div>
+        <span class="step-name">Review</span>
+      </div>
+    </div>
+
+    <form onsubmit="submitApply(event)">
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-user"></i> Personal Information</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input class="form-input" type="text" id="ap-name" placeholder="Your full name" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email *</label>
+              <input class="form-input" type="email" id="ap-email" placeholder="you@example.com" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input class="form-input" type="tel" id="ap-phone" placeholder="+91 98765 43210"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">LinkedIn Profile</label>
+              <input class="form-input" type="url" id="ap-linkedin" placeholder="linkedin.com/in/yourprofile"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-file-pdf"></i> Resume & Cover Letter</div>
+          <div class="form-group">
+            <label class="form-label">Upload Resume *</label>
+            <div class="file-upload" onclick="document.getElementById('resumeFile').click()">
+              <i class="fas fa-file-pdf"></i>
+              <span id="resumeFileName">Upload PDF or DOC (max 5MB)</span>
+              <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" onchange="handleResumeUpload(this)"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cover Letter</label>
+            <textarea class="form-textarea" id="ap-cover" placeholder="Tell us why you're the perfect fit…" style="min-height:140px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-label"><i class="fas fa-dollar-sign"></i> Additional Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Current Salary</label>
+              <input class="form-input" type="text" id="ap-cursalary" placeholder="e.g. $60,000"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expected Salary</label>
+              <input class="form-input" type="text" id="ap-expsalary" placeholder="e.g. $90,000"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notice Period</label>
+            <select class="form-select" id="ap-notice">
+              <option>Immediate</option>
+              <option>2 Weeks</option>
+              <option>1 Month</option>
+              <option>2 Months</option>
+              <option>3 Months</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-full">
+          <i class="fas fa-check-circle"></i> Submit Application
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="footer" style="margin-top:3rem">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 <em style="color:var(--gold)">JobHunt</em>.</span>
+    </div>
+  </footer>
+</div><!-- /page-apply -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: SAVED JOBS
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="page-saved">
+
+  <div class="saved-header">
+    <div class="container">
+      <h1>❤️ Saved Jobs</h1>
+      <p>Your bookmarked positions, ready for review</p>
+    </div>
+  </div>
+
+  <div class="saved-body">
+    <div id="savedList"></div>
+  </div>
+
+  <footer class="footer" style="margin-top:3rem">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 <em style="color:var(--gold)">JobHunt</em>.</span>
+    </div>
+  </footer>
+</div><!-- /page-saved -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: MY PROFILE
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="page-profile">
+
+  <div class="profile-hero-section">
+    <div class="profile-hero-inner">
+      <div class="profile-avatar" id="avatarEl" title="Click to edit">JH</div>
+      <div class="profile-name" id="profileNameEl">Job Seeker</div>
+      <div class="profile-role-label">Full Stack Developer</div>
+      <div class="profile-stats">
+        <div>
+          <div class="p-stat-num" id="appliedCount">0</div>
+          <div class="p-stat-label">Applied</div>
+        </div>
+        <div>
+          <div class="p-stat-num" id="savedCount">0</div>
+          <div class="p-stat-label">Saved</div>
+        </div>
+        <div>
+          <div class="p-stat-num">87<em>%</em></div>
+          <div class="p-stat-label">Match Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-body">
+
+    <div class="profile-card">
+      <div class="profile-card-title"><i class="fas fa-user"></i> Personal Info</div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" id="prof-name" placeholder="Your full name" oninput="updateProfileName(this.value)"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="prof-email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" type="tel" id="prof-phone" placeholder="+91 98765 43210"/>
+      </div>
+      <button class="btn btn-gold btn-full" onclick="saveProfile()" style="margin-top:0.5rem">
+        <i class="fas fa-save"></i> Save Profile
+      </button>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-card-title"><i class="fas fa-code"></i> Skills & Experience</div>
+      <div class="form-group">
+        <label class="form-label">Primary Role</label>
+        <select class="form-select" id="prof-role">
+          <option>Frontend Developer</option>
+          <option>Backend Developer</option>
+          <option selected>Full Stack Developer</option>
+          <option>DevOps Engineer</option>
+          <option>Digital Marketer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Experience Level</label>
+        <select class="form-select" id="prof-exp">
+          <option>0–1 Year</option>
+          <option>2–3 Years</option>
+          <option selected>4–5 Years</option>
+          <option>5+ Years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Key Skills</label>
+        <input class="form-input" type="text" id="prof-skills" placeholder="React, Node.js, Python, TypeScript…"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bio</label>
+        <textarea class="form-textarea" id="prof-bio" placeholder="Brief professional summary…" style="min-height:90px"></textarea>
+      </div>
+    </div>
+
+    <div class="profile-card full-width">
+      <div class="profile-card-title"><i class="fas fa-history"></i> Application History</div>
+      <div id="appHistory"></div>
+    </div>
+
+  </div>
+
+  <!-- Sign Out from Profile -->
+  <div style="text-align:center;padding:1rem 2rem 2rem">
+    <button class="btn btn-ghost" onclick="Auth.handleLogout ? Auth.handleLogout() : Toast.show('Sign out via navbar')" id="profile-signout-btn" style="display:none">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </button>
+  </div>
+
+  <footer class="footer" style="margin-top:1rem">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 <em style="color:var(--gold)">JobHunt</em>.</span>
+    </div>
+  </footer>
+</div><!-- /page-profile -->
+
+
+<!-- ═══════════════════════════════════════════════
+     JOB DETAIL MODAL
+     ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="jobModal" style="display:none">
+  <div class="modal" id="modalContent">
+    <button class="modal-close-btn" onclick="Modal.close()"><i class="fas fa-times"></i></button>
+
+    <div class="modal-header">
+      <div class="modal-logo" id="modalEmoji">💼</div>
+      <div>
+        <div class="modal-title" id="modalTitle">Job Title</div>
+        <div class="modal-subtitle" id="modalCompany">Company · Posted</div>
+      </div>
+    </div>
+
+    <div class="modal-details">
+      <div class="modal-detail">
+        <div class="modal-detail-label">Location</div>
+        <div class="modal-detail-value" id="modalLocation">—</div>
+      </div>
+      <div class="modal-detail">
+        <div class="modal-detail-label">Salary</div>
+        <div class="modal-detail-value" id="modalSalary">—</div>
+      </div>
+      <div class="modal-detail">
+        <div class="modal-detail-label">Experience</div>
+        <div class="modal-detail-value" id="modalExp">—</div>
+      </div>
+      <div class="modal-detail">
+        <div class="modal-detail-label">Category</div>
+        <div class="modal-detail-value" id="modalCat">—</div>
+      </div>
+    </div>
+
+    <p class="modal-desc" id="modalDesc"></p>
+
+    <div class="modal-actions">
+      <button class="modal-apply-btn" id="modalApplyBtn">
+        <i class="fas fa-paper-plane"></i> Apply Now
+      </button>
+      <button class="modal-save-btn" id="modalSaveBtn">❤️ Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── Scripts (in dependency order) ─── -->
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+  // ─── BOOTSTRAP ────────────────────────────────────────────────────────────
+  (function init() {
+    ThemeManager.init();
+    NavbarManager.init();
+    ProgressBar.init();
+    Modal.initOverlayClose();
+    Pages.updateCounts();
+
+    // Init Auth module
+    Auth.init();
+
+    // Handle sign-out btn on profile page
+    const profileSignOut = document.getElementById('profile-signout-btn');
+
+    // Update profile signout visibility based on auth state
+    function syncProfileSignOut() {
+      if (profileSignOut) {
+        profileSignOut.style.display = Auth.isLoggedIn() ? 'inline-flex' : 'none';
+        profileSignOut.onclick = () => {
+          // Call the logout method through the Auth module
+          const btn = document.getElementById('nav-auth-btn');
+          if (btn) btn.click();
+        };
+      }
+    }
+
+    // Override the nav auth btn to also sync profile
+    const navAuthBtn = document.getElementById('nav-auth-btn');
+    if (navAuthBtn && !Auth.isLoggedIn()) {
+      navAuthBtn.onclick = () => { Auth.showAuth(); };
+    }
+
+    syncProfileSignOut();
+
+    // Close auth overlay by clicking backdrop
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) Auth.hideAuth();
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
